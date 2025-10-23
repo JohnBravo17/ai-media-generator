@@ -1,12 +1,11 @@
-// AI Media Generator API - Serverless Native
-// This version works in Vercel's serverless environment
+// Serverless-Native API - No server imports
+// This API replicates tRPC functionality without importing from /server
 
 export default async function handler(req: any, res: any) {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-trpc-source');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -15,88 +14,59 @@ export default async function handler(req: any, res: any) {
   const { method, url, query, body } = req;
   
   try {
-    console.log(`🚀 API Call: ${method} ${url}`);
-
-    // Health check
-    if (url === '/api' || url === '/api/') {
-      return res.status(200).json({
-        status: 'success',
-        message: 'AI Media Generator API - Serverless',
-        timestamp: new Date().toISOString()
-      });
-    }
-
-    // Parse tRPC-style paths
+    // Parse URL to extract tRPC-style paths
     const urlParts = url.split('/');
-    const trpcIndex = urlParts.indexOf('trpc');
+    const procedure = urlParts[urlParts.length - 1];
     
-    if (trpcIndex === -1) {
-      return res.status(404).json({ error: 'tRPC endpoint not found' });
-    }
+    console.log(`📡 Serverless API Call: ${method} ${url}`);
+    console.log(`🎯 Procedure: ${procedure}`);
 
-    const procedure = urlParts.slice(trpcIndex + 1).join('.');
-    console.log(`🎯 tRPC Procedure: ${procedure}`);
-
-    // Handle credits
+    // Handle different procedures
     if (procedure === 'credits.getBalance') {
-      return res.status(200).json({
+      // Mock credits balance
+      const result = {
         result: {
           data: {
             balance: 1000 // Mock balance
           }
         }
-      });
+      };
+      return res.status(200).json(result);
     }
-
-    // Handle image generation
+    
     if (procedure === 'generations.generateImage') {
-      console.log('🎨 Image generation request:', body);
+      // Mock image generation
+      console.log('🎨 Mock Image Generation Request');
       
-      const input = body?.input || {};
-      const { prompt, model = 'runware', aspectRatio = '1:1' } = input;
-
-      // Mock successful generation
-      const mockResult = {
+      const result = {
         result: {
           data: {
             success: true,
-            imageUrl: 'https://via.placeholder.com/512x512/4F46E5/FFFFFF?text=' + encodeURIComponent(prompt || 'Generated'),
-            prompt: prompt || 'test prompt',
-            model,
-            aspectRatio,
+            imageUrl: 'https://via.placeholder.com/512x512?text=Mock+Generated+Image',
+            prompt: body?.input?.prompt || 'mock prompt',
+            model: 'mock-runware',
+            aspectRatio: '1:1',
             timestamp: new Date().toISOString()
           }
         }
       };
-
-      return res.status(200).json(mockResult);
+      
+      return res.status(200).json(result);
     }
 
-    // Handle rate limit
-    if (procedure === 'generations.rateLimit') {
-      return res.status(200).json({
-        result: {
-          data: {
-            canGenerate: true,
-            remainingGenerations: 10
-          }
-        }
-      });
-    }
-
-    // Default for unknown procedures
-    return res.status(404).json({
-      error: 'Procedure not found',
+    // Default response for unknown procedures
+    return res.status(200).json({
+      message: 'Serverless API working!',
       procedure,
+      timestamp: new Date().toISOString(),
       availableProcedures: [
         'credits.getBalance',
-        'generations.generateImage',
-        'generations.rateLimit'
+        'generations.generateImage'
       ]
     });
 
   } catch (error) {
-    console.error('❌ API Error:', error);
+    console.error('❌ Serverless API Error:', error);
     return res.status(500).json({
       error: 'Internal server error',
       message: error instanceof Error ? error.message : 'Unknown error'
