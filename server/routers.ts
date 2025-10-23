@@ -230,24 +230,30 @@ export const appRouter = router({
           console.log("✅ Generation Success Response:", response);
           return response;
         } catch (error) {
-          // Save failed generation record
-          await createGeneration({
-            id: generationId,
-            userId,
-            provider: input.provider,
-            type: "text_to_image",
-            prompt: input.prompt,
-            model: input.model || null,
-            parameters: JSON.stringify({
-              width: input.width,
-              height: input.height,
-              steps: input.steps,
-            }),
-            status: "failed",
-            errorMessage: error instanceof Error ? error.message : "Unknown error",
-            apiCost: 0,
-            userCost: 0,
-          });
+          console.error("❌ Generation Error:", error);
+          
+          // Save failed generation record (skip if database not available)
+          try {
+            await createGeneration({
+              id: generationId,
+              userId,
+              provider: input.provider,
+              type: "text_to_image",
+              prompt: input.prompt,
+              model: input.model || null,
+              parameters: JSON.stringify({
+                width: input.width,
+                height: input.height,
+                steps: input.steps,
+              }),
+              status: "failed",
+              errorMessage: error instanceof Error ? error.message : "Unknown error",
+              apiCost: 0,
+              userCost: 0,
+            });
+          } catch (dbError) {
+            console.warn("⚠️ Could not save generation record (database not available):", dbError);
+          }
 
           throw error;
         }
