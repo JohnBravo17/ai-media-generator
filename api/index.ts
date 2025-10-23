@@ -77,4 +77,7 @@ app.use(
   })
 );
 
-export default app;
+// Export handler for Vercel
+export default (req: VercelRequest, res: VercelResponse) => {
+  return app(req as any, res as any);
+};
