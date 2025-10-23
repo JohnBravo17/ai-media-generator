@@ -21,10 +21,23 @@ export default async function handler(req: any, res: any) {
 
     // Parse tRPC procedure from URL
     // URL format: /api/trpc/credits.getBalance or /api/trpc/generations.generateImage
-    const urlParts = url.split('/');
-    const trpcIndex = urlParts.indexOf('trpc');
+    console.log(`🔍 Full URL: ${url}`);
     
-    if (trpcIndex === -1 || !urlParts[trpcIndex + 1]) {
+    // Extract procedure from URL - handle both /api/trpc and /trpc patterns
+    let procedure = '';
+    if (url.includes('/trpc/')) {
+      // Extract everything after /trpc/
+      const parts = url.split('/trpc/');
+      if (parts.length > 1) {
+        procedure = parts[1];
+        // Remove query parameters if any
+        procedure = procedure.split('?')[0];
+      }
+    }
+    
+    console.log(`🎯 Extracted Procedure: "${procedure}"`);
+    
+    if (!procedure) {
       return res.status(200).json({
         message: 'tRPC API Endpoint',
         availableProcedures: [
@@ -35,8 +48,6 @@ export default async function handler(req: any, res: any) {
         ]
       });
     }
-
-    const procedure = urlParts.slice(trpcIndex + 1).join('.');
     console.log(`🎯 Procedure: ${procedure}`);
 
     // Handle Credits
@@ -85,7 +96,7 @@ export default async function handler(req: any, res: any) {
         }
       }
 
-      const { prompt, model = 'runware', aspectRatio = '1:1' } = input;
+      const { prompt, model = 'runware', aspectRatio = '1:1' } = input as any;
       
       console.log('🖼️ Generation params:', { prompt, model, aspectRatio });
 
