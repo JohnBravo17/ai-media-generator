@@ -91,6 +91,9 @@ export async function generateImageNanoBanana(params: {
   error?: string;
   processingTime?: number;
 }> {
+  console.log("[Nano Banana] Starting image generation...");
+  console.log("[Nano Banana] API Key available:", !!REPLICATE_API_KEY);
+  
   if (!REPLICATE_API_KEY) {
     return {
       success: false,
