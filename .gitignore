@@ -105,3 +105,23 @@ temp/
 *.db
 *.sqlite
 *.sqlite3
+
+# Firebase
+.firebase/
+.firebaserc
+firebase.json
+firebase-debug.log*
+
+# Test files
+test-*.js
+test-*.html
+test-*.ts
+
+# Vercel
+.vercel/
+
+# Other unnecessary files
+*.bak
+*.backup
+*.orig
+*.tmp
