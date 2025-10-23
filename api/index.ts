@@ -36,7 +36,7 @@ const upload = multer({
 });
 
 // File upload endpoint
-app.post('/api/upload', upload.single('file'), async (req: MulterRequest, res: Response) => {
+app.post('/api/upload', upload.single('file'), async (req: MulterRequest, res: any) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file provided' });
