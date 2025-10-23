@@ -500,12 +500,13 @@ export const appRouter = router({
             
             console.log("🛠️ Final frameImages structure:", JSON.stringify(frameImages, null, 2));
             
+            const imageDataStr = typeof imageData === 'string' ? imageData : JSON.stringify(imageData);
             return {
               success: true,
-              processedImageLength: imageData.length,
+              processedImageLength: imageDataStr.length,
               frameImages: frameImages,
-              detectedMimeType: imageData.includes('image/png') ? 'image/png' : 
-                               imageData.includes('image/webp') ? 'image/webp' : 'image/jpeg',
+              detectedMimeType: imageDataStr.includes('image/png') ? 'image/png' : 
+                               imageDataStr.includes('image/webp') ? 'image/webp' : 'image/jpeg',
             };
             
           } catch (error) {

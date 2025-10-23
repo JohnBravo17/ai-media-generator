@@ -178,7 +178,7 @@ export default function Generate() {
   const generateImageMutation = trpc.generations.generateImage.useMutation({
     onSuccess: (data) => {
       console.log("🎉 Generation success data:", data);
-      setGeneratedImage(data.imageUrl || "");
+      setGeneratedImage('imageUrl' in data ? data.imageUrl || "" : "");
       toast.success("Image generated successfully!");
     },
     onError: (error) => {

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import express from "express";
+import express, { Request, Response } from "express";
 import multer from "multer";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { appRouter } from '../server/routers';
@@ -30,7 +30,7 @@ const upload = multer({
 });
 
 // File upload endpoint
-app.post('/api/upload', upload.single('file'), async (req, res) => {
+app.post('/api/upload', upload.single('file'), async (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file provided' });
