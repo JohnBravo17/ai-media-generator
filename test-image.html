@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Runware Image Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            width: 100%;
+            height: 200px;
+            text-align: center;
+            padding: 20px;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        .upload-area.dragover {
+            border-color: #000;
+            background-color: #f0f0f0;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Runware Image Processing Test</h1>
+    <p>This tool helps debug the image-to-video processing by testing the same image conversion logic used by your app.</p>
+    
+    <div class="upload-area" id="uploadArea">
+        <p>Drop an image here or click to select</p>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+    </div>
+    
+    <button id="testBtn" disabled>Test Image Processing</button>
+    
+    <div id="results"></div>
+
+    <script>
+        let selectedFile = null;
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const testBtn = document.getElementById('testBtn');
+        const results = document.getElementById('results');
+
+        // File upload handling
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+            
+            selectedFile = file;
+            uploadArea.innerHTML = `<p>Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)</p>`;
+            testBtn.disabled = false;
+        }
+
+        // Test button handler
+        testBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            testBtn.disabled = true;
+            testBtn.textContent = 'Testing...';
+            results.innerHTML = '<div class="log">Converting image to base64...</div>';
+            
+            try {
+                // Convert image to base64 (same as frontend)
+                const base64 = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const base64 = reader.result;
+                        // Remove data:image/...;base64, prefix (same as frontend)
+                        const base64Data = base64.split(',')[1];
+                        resolve(base64Data);
+                    };
+                    reader.onerror = reject;
+                    reader.readAsDataURL(selectedFile);
+                });
+                
+                results.innerHTML += `<div class="log">Base64 length: ${base64.length} chars\nFirst 50 chars: ${base64.substring(0, 50)}...</div>`;
+                
+                // Call the test endpoint
+                const response = await fetch('http://localhost:3000/api/test-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        imageBase64: base64
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const result = data;
+                    results.innerHTML += `
+                        <div class="result success">
+                            <h3>✅ Test Successful!</h3>
+                            <p><strong>Processed Image Length:</strong> ${result.processedImageLength}</p>
+                            <p><strong>Detected MIME Type:</strong> ${result.detectedMimeType}</p>
+                            <div class="log">${JSON.stringify(result.frameImages, null, 2)}</div>
+                        </div>
+                    `;
+                } else {
+                    const error = data.error || 'Unknown error';
+                    results.innerHTML += `
+                        <div class="result error">
+                            <h3>❌ Test Failed</h3>
+                            <p>${error}</p>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                results.innerHTML += `
+                    <div class="result error">
+                        <h3>❌ Network Error</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            testBtn.disabled = false;
+            testBtn.textContent = 'Test Image Processing';
+        });
+    </script>
+</body>
+</html>

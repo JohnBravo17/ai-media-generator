@@ -1,0 +1,16 @@
+{
+  "query": "SELECT * FROM credits WHERE userId = 'NeM69wuJ8UQBjm2ENJKQ7U'",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user Ge5N2wmbdTrmGbP.root --database FuAtCuGCszUjhYF6yFj6qv --execute SELECT * FROM credits WHERE userId = 'NeM69wuJ8UQBjm2ENJKQ7U'",
+  "rows": [
+    {
+      "userId": "NeM69wuJ8UQBjm2ENJKQ7U",
+      "balance": "100",
+      "createdAt": "2025-10-21 17:32:55",
+      "updatedAt": "2025-10-22 09:43:24"
+    }
+  ],
+  "messages": [],
+  "stdout": "userId\tbalance\tcreatedAt\tupdatedAt\nNeM69wuJ8UQBjm2ENJKQ7U\t100\t2025-10-21 17:32:55\t2025-10-22 09:43:24\n",
+  "stderr": "",
+  "execution_time_ms": 1505
+}
