@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import multer from "multer";
 
 // Extend Request interface to include multer file
