@@ -1,6 +1,11 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import express, { Request, Response } from "express";
 import multer from "multer";
+
+// Extend Request interface to include multer file
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { appRouter } from '../server/routers';
 import { createContext } from '../server/_core/context';
@@ -30,7 +35,7 @@ const upload = multer({
 });
 
 // File upload endpoint
-app.post('/api/upload', upload.single('file'), async (req: Request, res: Response) => {
+app.post('/api/upload', upload.single('file'), async (req: MulterRequest, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file provided' });
