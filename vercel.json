@@ -4,15 +4,8 @@
   "installCommand": "pnpm install",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "api/index.ts": {}
-  }
+  ]
 }
